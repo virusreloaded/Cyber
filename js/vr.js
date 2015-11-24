@@ -14,7 +14,9 @@ var global_head = [];
 var speed = [];
 var global_speed = [];
 var geom = [];
-var flag = 0;
+var flag = 1;
+
+var timeout_render = 0;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -88,7 +90,7 @@ function init() {
 
 	for ( var i = 1; i < 33; i ++ ) {
 
-		loader.load( 'obj/head/head-'+ i +'.obj', function ( object3d ) {
+			loader.load( 'obj/head/head-'+ i +'.obj', function ( object3d ) {
 
 
 			object3d.traverse( function ( child ) {
@@ -109,7 +111,6 @@ function init() {
 					scene.add(head_mesh[i]);
 
 					global_head.push(head_mesh[i]);
-					global_speed.push(speed[i]);
 
 
 			    }
@@ -119,61 +120,12 @@ function init() {
 
 		});
 
-			if (i > 31) { flag = 1};
+
+		if (i > 31) { flag = 0};
 
 	}
-	var h_speed = 0.003;
+	var h_speed = 0.004;
 	global_speed = [h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed,h_speed,-h_speed]
-	var geo = new THREE.TetrahedronGeometry( 1, 0 );
-
-	var start = Date.now();
-
-	var xgrid = 14,
-		ygrid = 9,
-		zgrid = 14;
-/*
-	nobjects = xgrid * ygrid * zgrid;
-
-	c = 0;
-
-	//var s = 0.25;
-	var s = 60;
-
-	for ( i = 0; i < xgrid; i ++ )
-	for ( j = 0; j < ygrid; j ++ )
-	for ( k = 0; k < zgrid; k ++ ) {
-
-		if ( singleMaterial ) {
-
-			mesh = new THREE.Mesh( geo, zmaterial );
-
-		} else {
-
-			materials[ c ] = new THREE.MeshBasicMaterial( parameters );
-			mesh = new THREE.Mesh( geo, materials[ c ] );
-			//mesh = new THREE.Mesh( geo, new THREE.MeshBasicMaterial({color:0x4b4b4b, shading: THREE.FlatShading}) );
-
-		}
-
-		x = 200 * ( i - xgrid/2 );
-		y = 200 * ( j - ygrid/2 );
-		z = 200 * ( k - zgrid/2 );
-
-		mesh.position.set( x, y, z );
-		mesh.scale.set( s, s, s );
-
-		mesh.matrixAutoUpdate = false;
-		mesh.updateMatrix();
-
-		scene.add( mesh );
-		objects.push( mesh );
-
-		c ++;
-
-	}
-*/
-	//console.log("init time: ", Date.now() - start );
-
 	scene.matrixAutoUpdate = false;
 
 	initPostprocessing();
@@ -189,11 +141,19 @@ function init() {
 	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
 	document.addEventListener( 'touchmove', onDocumentTouchMove, false );
 
-	window.addEventListener( 'resize', onWindowResize, false );
+	window.addEventListener( 'resize', function() {
+		var w = window.innerWidth,
+			h = window.innerHeight;
+
+		camera.aspect = w / h;
+		camera.updateProjectionMatrix();
+
+		renderer.setSize( w, h );
+	}, false );
 
 	var effectController  = {
 
-		focus: 		0.55,
+		focus: 		1,
 		aperture:	0.025,
 		maxblur:	1.0
 
@@ -247,19 +207,23 @@ function onDocumentTouchMove( event ) {
 
 }
 
-function onWindowResize() {
 
-	windowHalfX = window.innerWidth / 2;
-	windowHalfY = window.innerHeight / 2;
+function checkFlag() {
 
-	width = window.innerWidth;
-	height = window.innerHeight;
+	if (flag == 1) { console.log('hi') }
 
-	camera.aspect = width / height;
-	camera.updateProjectionMatrix();
+	else if (flag == 0) { 
+			for ( var j = 0; j < 32; j += 1 ) {
+				
+				if (global_head[j].rotation.y < 6.28 && global_head[j].rotation.y > -6.28) { global_head[j].rotation.y += global_speed[j] }
 
-	renderer.setSize( width, height );
-	postprocessing.composer.setSize( width, height );
+				else {
+					timeout_render = 0;
+					global_head[j].rotation.y = 0;
+				}
+
+			}
+		}
 
 }
 
@@ -267,7 +231,7 @@ function initPostprocessing() {
 	var renderPass = new THREE.RenderPass( scene, camera );
 
 	var bokehPass = new THREE.BokehPass( scene, camera, {
-		focus: 		0.55,
+		focus: 		1,
 		aperture:	0.025,
 		maxblur:	1.0,
 
@@ -291,15 +255,15 @@ function animate() {
 
 	requestAnimationFrame( animate, renderer.domElement );
 
-	if (flag == 1) {
-		for ( var i = 0; i < 32; i += 1 ) {
+	//console.log(effectController.focus);
 
-						global_head[i].rotation.y += global_speed[i];
-						console.log(i);
+	timeout_render += 0.01;
+	//console.log(timeout_render);
 
-		}
+	if (timeout_render > 1) {
+		checkFlag();
 	}
-
+	
 	render();
 	stats.update();
 
@@ -308,7 +272,7 @@ function animate() {
 function render() {
 
 
-	console.log('Flag status:',flag);
+	//console.log('Flag status:',flag);
 
 	postprocessing.composer.render( 0.1 );
 
