@@ -4,10 +4,13 @@
 		<title>three.js webgl - postprocessing - depth-of-field</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link href='http://fonts.googleapis.com/css?family=Roboto:300,500,700' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="css/style.css">
 	</head>
 
 	<body>
+	
+		<script src="js/jquery-2.1.3.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
 
 		<script src="js/shaders/CopyShader.js"></script>
@@ -25,11 +28,29 @@
 
 		<script src='js/libs/dat.gui.min.js'></script>
 
-		<div id="info">
+		<!--<div id="info">
 			vr iBank - GoGo
+		</div>-->
+		<img class='logo' src='img/logo.png'/>
+		<div class='burger'>
+			<div class='navi1'></div>
+			<div class='navi2'></div>
+			<div class='navi3'></div>
 		</div>
-
+		<ul class='menu'>
+			<li class='first'>HOME</li>
+			<li>FIELDS OF EXPERTISE</li>
+			<li>PROJECTS</li>
+			<li>HOW DO WE WORK</li>
+			<li>COMPANY</li>
+			<li>CONTACTS</li>
+		</ul>
+		<div class='content'>
+			<p>Main principle</p>
+			<img src='img/text.png'/>
+		</div>
 		<div class='mask'></div>
 	</body>
+	<script src="js/app.js"></script>
 	<script src="js/vr.js"></script>
 </html>
